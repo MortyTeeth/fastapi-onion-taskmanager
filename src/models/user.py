@@ -1,23 +1,46 @@
+from typing import TYPE_CHECKING
+
 from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.models import BaseModel
-from src.models.mixins.company_mixin import CompanyMixin
-from src.schemas.user import UserDB
-from src.utils.custom_types import created_at, updated_at, uuid_pk
+from .base import Base
+
+if TYPE_CHECKING:
+    from .task import Task, Board
 
 
-class UserModel(CompanyMixin, BaseModel):
-    __tablename__ = 'user'
+class User(Base):
+    __tablename__ = "users"
 
-    _company_back_populates: str | None = 'users'
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    username: Mapped[str] = mapped_column(String, unique=True, nullable=False, index=True)
+    email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    hashed_password: Mapped[str] = mapped_column(String, nullable=False)
 
-    id: Mapped[uuid_pk]
-    first_name: Mapped[str] = mapped_column(String(50))
-    last_name: Mapped[str] = mapped_column(String(50))
-    middle_name: Mapped[str | None] = mapped_column(String(50), default=None)
-    created_at: Mapped[created_at]
-    updated_at: Mapped[updated_at]
+    authored_tasks: Mapped[list["Task"]] = relationship(
+        "Task",
+        back_populates="author",
+        foreign_keys="Task.author_id",
+    )
 
-    def to_schema(self) -> UserDB:
-        return UserDB(**self.__dict__)
+
+    assigned_tasks: Mapped[list["Task"]] = relationship(
+        "Task",
+        back_populates="assignee",
+        foreign_keys="Task.assignee_id",
+    )
+
+
+    watched_tasks: Mapped[list["Task"]] = relationship(
+        "Task",
+        secondary="task_watchers",
+        back_populates="watchers",
+    )
+
+
+    owned_boards: Mapped[list["Board"]] = relationship(
+        "Board",
+        back_populates="owner",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )

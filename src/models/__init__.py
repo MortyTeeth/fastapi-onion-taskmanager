@@ -1,9 +1,6 @@
-__all__ = [
-    'BaseModel',
-    'CompanyModel',
-    'UserModel',
-]
+from .base import Base
+from .user import User
+from .task import Task, Board, Sprint
+from .enums import TaskStatus
 
-from src.models.base import BaseModel
-from src.models.company import CompanyModel
-from src.models.user import UserModel
+__all__ = ["Base", "User", "Task", "Board", "Sprint", "TaskStatus"]

@@ -1,14 +1,37 @@
-# created by virtualenv automatically
-*idea
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+ENV/
+env_bak/
+venv_bak/
 
-/venv
 
-/.mypy_cache
+.idea/
 
-/.pytest_cache
 
-.env
-.test.env
+instance/
+*.sqlite
+*.db
 
-logs.json
-src/logs.json
+
+.poetry/
+
+
+alembic/__pycache__/
+alembic/versions/__pycache__/
+
+
+*.log
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+
+
+.DS_Store
+" > .gitignore
