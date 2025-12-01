@@ -1,16 +1,17 @@
 from typing import List, Optional
+
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..models.task import Task, TaskStatus
+from ..models.task import Task
 
 
 class TaskRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def add(self, task: Task):
+    async def add(self, task: Task) -> None:
         self.session.add(task)
         await self.session.flush([task])
 
@@ -22,7 +23,7 @@ class TaskRepository:
                 joinedload(Task.assignee),
                 joinedload(Task.watchers),
                 joinedload(Task.board),
-                joinedload(Task.sprint)
+                joinedload(Task.sprint),
             )
             .where(Task.id == task_id)
         )
@@ -31,15 +32,18 @@ class TaskRepository:
     async def list(
         self,
         author_id: Optional[int] = None,
-        status: Optional[TaskStatus] = None,
+        status: Optional[str] = None,
         assignee_id: Optional[int] = None,
     ) -> List[Task]:
-        query = select(Task).options(
-            joinedload(Task.author),
-            joinedload(Task.assignee),
-            joinedload(Task.watchers),
-            joinedload(Task.board),
-            joinedload(Task.sprint)
+        query = (
+            select(Task)
+            .options(
+                joinedload(Task.author),
+                joinedload(Task.assignee),
+                joinedload(Task.watchers),
+                joinedload(Task.board),
+                joinedload(Task.sprint),
+            )
         )
 
         if author_id is not None:
@@ -52,5 +56,5 @@ class TaskRepository:
         result = await self.session.execute(query)
         return result.scalars().unique().all()
 
-    async def delete(self, task: Task):
+    async def delete(self, task: Task) -> None:
         await self.session.delete(task)

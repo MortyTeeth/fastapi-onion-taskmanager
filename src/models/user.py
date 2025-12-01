@@ -23,20 +23,17 @@ class User(Base):
         foreign_keys="Task.author_id",
     )
 
-
     assigned_tasks: Mapped[list["Task"]] = relationship(
         "Task",
         back_populates="assignee",
         foreign_keys="Task.assignee_id",
     )
 
-
     watched_tasks: Mapped[list["Task"]] = relationship(
         "Task",
         secondary="task_watchers",
         back_populates="watchers",
     )
-
 
     owned_boards: Mapped[list["Board"]] = relationship(
         "Board",

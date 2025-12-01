@@ -8,8 +8,8 @@ router = APIRouter()
 
 @router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def create_user(
-    user_data: UserCreateRequest,
-    uow=Depends(get_uow)
+        user_data: UserCreateRequest,
+        uow=Depends(get_uow)
 ):
     user = await UserService().create_user(uow, user_data)
     return user

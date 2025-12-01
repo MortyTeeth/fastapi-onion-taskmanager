@@ -10,7 +10,6 @@ from .enums import TaskStatus
 if TYPE_CHECKING:
     from .user import User
 
-
 task_watchers = Table(
     "task_watchers",
     Base.metadata,
@@ -53,25 +52,21 @@ class Task(Base):
         SQLEnum(TaskStatus), default=TaskStatus.TODO, nullable=False
     )
 
-
     author_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     author: Mapped["User"] = relationship("User", back_populates="authored_tasks", foreign_keys=[author_id])
 
-
     assignee_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"), nullable=True)
-    assignee: Mapped[Optional["User"]] = relationship("User", back_populates="assigned_tasks", foreign_keys=[assignee_id])
-
+    assignee: Mapped[Optional["User"]] = relationship("User", back_populates="assigned_tasks",
+                                                      foreign_keys=[assignee_id])
 
     board_id: Mapped[int] = mapped_column(ForeignKey("boards.id"), nullable=False)
     board: Mapped["Board"] = relationship("Board", back_populates="tasks")
-
 
     sprint_id: Mapped[Optional[int]] = mapped_column(ForeignKey("sprints.id"), nullable=True)
     sprint: Mapped[Optional["Sprint"]] = relationship("Sprint")
 
     column: Mapped[Optional[str]] = mapped_column(nullable=True)
     group: Mapped[Optional[str]] = mapped_column(nullable=True)
-
 
     watchers: Mapped[list["User"]] = relationship(
         "User",

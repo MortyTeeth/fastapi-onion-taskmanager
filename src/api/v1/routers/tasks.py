@@ -6,9 +6,7 @@ from src.schemas.task.task import TaskCreateRequest, TaskUpdateRequest, TaskResp
 from src.models.enums import TaskStatus
 from src.utils.unit_of_work import UnitOfWork, get_uow
 
-
 router = APIRouter(tags=["tasks"])
-
 
 
 def get_fake_current_user():
@@ -29,30 +27,28 @@ async def create_task(
 
 @router.get("/", response_model=List[TaskResponse])
 async def get_tasks(
-    author_id: Optional[int] = Query(None),
-    status: Optional[TaskStatus] = Query(None),
-    assignee_id: Optional[int] = Query(None),
+    author_id: Optional[int] = Query(None, description="Фильтр по автору"),
+    assignee_id: Optional[int] = Query(None, description="Фильтр по исполнителю"),
+    status: Optional[str] = Query(None, description="Фильтр по статусу: TODO, IN_PROGRESS, DONE"),
     uow: UnitOfWork = Depends(get_uow),
     service: TaskService = Depends(),
 ):
-    tasks = await service.list_tasks(
+    status_enum: Optional[TaskStatus] = None
+    if status:
+        try:
+            status_enum = TaskStatus(status.strip().upper())
+        except ValueError:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Неверный статус: '{status}'. Допустимые: TODO, IN_PROGRESS, DONE"
+            )
+
+    return await service.list_tasks(
         author_id=author_id,
         assignee_id=assignee_id,
-        status=status.value if status else None,
+        status=status_enum,
         uow=uow,
     )
-    return tasks
-
-
-@router.get("/", response_model=List[TaskResponse])
-async def get_tasks(
-    author_id: Optional[int] = Query(None),
-    status: Optional[TaskStatus] = Query(None),
-    assignee_id: Optional[int] = Query(None),
-    uow: UnitOfWork = Depends(get_uow),
-    service: TaskService = Depends(),
-):
-    return await service.list_tasks(author_id, assignee_id, status, uow)
 
 
 @router.patch("/{task_id}", response_model=TaskResponse)
@@ -77,3 +73,4 @@ async def delete_task(
     success = await service.delete_task(task_id, uow)
     if not success:
         raise HTTPException(status_code=404, detail="Task not found")
+    return

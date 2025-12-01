@@ -8,7 +8,7 @@ from uuid import UUID
 from sqlalchemy import delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models import BaseModel
+from src.models.base import Base
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Result
@@ -68,7 +68,7 @@ class AbstractRepository(ABC):
         raise NotImplementedError
 
 
-M = TypeVar('M', bound=BaseModel)
+M = TypeVar('M', bound=Base)
 
 
 class SqlAlchemyRepository(AbstractRepository, Generic[M]):
@@ -76,7 +76,7 @@ class SqlAlchemyRepository(AbstractRepository, Generic[M]):
     The repository works using the SqlAlchemy library.
     """
 
-    _model: type[M]  # must be a child class of SQLAlchemy DeclarativeBase
+    _model: type[M]
 
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
